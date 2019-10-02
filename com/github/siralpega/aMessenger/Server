@@ -1,0 +1,35 @@
+package com.github.siralpega.twomessenger;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class Server extends Foundation
+{
+	public static void main(String[]args) throws IOException
+	{
+		int port = 1234;
+		ServerSocket serverSocket = new ServerSocket(port);
+		createGUI(ConnectionType.SERVER);
+		Socket clientSocket = openConnection(serverSocket);
+
+		String input;
+		while(isRunning())
+		{
+			input = recieving.readLine();
+			if(input == null)
+				continue;
+			else if(input.equalsIgnoreCase("end"))
+			{
+				running = false; //TODO: fix the fact that the program that calls exit DOES NOT exit, but the other one does??!?!?!?
+				end();
+			}
+			else
+				displayMessage(input);	
+		} 
+		System.out.println("boop");
+		clientSocket.close();
+		serverSocket.close();
+		System.exit(0);
+	}
+}
