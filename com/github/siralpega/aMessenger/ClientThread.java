@@ -34,9 +34,9 @@ public class ClientThread implements Runnable
 				sending.println("GETNAME");
 				username = recieving.readLine();
 				if(username == null)
-					return;
+					continue;
 				else if(username.isEmpty() || username.isBlank())
-					return;
+					continue;
 				else
 					break;
 			}
@@ -57,7 +57,7 @@ public class ClientThread implements Runnable
 			if(sending != null && username != null)
 			{
 				Server.removeWriterAndName(sending, username);
-				Server.sendMessage(username + " has left");
+				Server.sendMessage("<< " + username + " has left");
 			}
 			try { sending.close(); recieving.close(); client.close(); } catch(IOException ex) {System.out.println(ex.getMessage());}
 		}

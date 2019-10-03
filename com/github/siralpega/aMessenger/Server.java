@@ -10,7 +10,7 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 /**
- * 
+ * TODO: If can't connect to server, then have client display that and let them re-enter
  * 
  * 
  * @author Alek
@@ -21,6 +21,7 @@ public class Server
 	private static int port = 7777;
 	private static List<PrintWriter> clients;
 	private static List<String> names;
+	private static boolean quitOnEmpty = false;
 
 	public static void main(String[]args) throws IOException
 	{
@@ -28,7 +29,6 @@ public class Server
 		ExecutorService pool = Executors.newCachedThreadPool();
 		clients = new ArrayList<PrintWriter>();
 		names = new ArrayList<String>();
-		boolean run = true;
 
 		setup();
 
@@ -42,6 +42,7 @@ public class Server
 			System.exit(-1);
 		}
 
+		boolean run = true;
 		while(run)
 		{
 			try 
@@ -66,7 +67,11 @@ public class Server
 		System.out.println("SERVER AWAKE! Starting setup...");
 		System.out.println("Enter port");
 		port = keyboard.nextInt();
-		System.out.println("Server has started.");
+		System.out.println("Should server quit after last user quits? (yes/no)");
+		String response = keyboard.next();
+		if(response.equalsIgnoreCase("yes"))
+			quitOnEmpty = true;
+		System.out.println("Starting server on " + port);
 		keyboard.close();
 	}
 
@@ -85,10 +90,10 @@ public class Server
 
 	public static void addName(String name)
 	{
-		System.out.println("ADDING: " + name);
+		System.out.println(">ADDING: " + name);
 		names.add(name);
 		for (PrintWriter pw : clients) 
-			pw.println("MESSAGE " + name + " has joined");
+			pw.println("MESSAGE " + ">> " + name + " has joined");
 
 	}
 
@@ -99,8 +104,13 @@ public class Server
 
 	public static void removeWriterAndName(PrintWriter pw, String name)
 	{
-		System.out.println("REMOVING: " + name);
+		System.out.println(">REMOVING: " + name);
 		clients.remove(pw);
 		names.remove(name);
+		if(clients.isEmpty() && quitOnEmpty)
+		{
+			System.out.println(">!< Server is now empty, shutting down.");
+			//TODO: figure this out. cant do in while cause it waits on accept() before this ever gets called
+		}	
 	}
 }
