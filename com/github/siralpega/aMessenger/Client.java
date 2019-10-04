@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -27,9 +28,10 @@ public class Client
 	private JFrame frame = new JFrame("aMessenger");
 	private JTextArea messageBox = new JTextArea(16, 50);
 	private JTextField textBox = new JTextField(50);
+	private JLabel label = new JLabel();
 
-	private static String[] emoKeywords = {"oWo", "smile", "<3", "zzz"};
-	private static int[] codePoints = {0x1F60B, 0x1F600, 0x2764, 0x1F634};
+	private static String[] emoKeywords = {"oWo", "smile", "<3", "zzz", "wut", "shite", "joecup", "ale"};
+	private static int[] codePoints = {0x1F60B, 0x1F600, 0x2764, 0x1F634, 0x1F610, 0x1F4A9, 0x2615, 0x1F37A};
 
 	public Client()
 	{
@@ -48,6 +50,7 @@ public class Client
 		DefaultCaret caret = (DefaultCaret)messageBox.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		pane.setAutoscrolls(true);
+		frame.getContentPane().add(label, BorderLayout.NORTH);
 		frame.getContentPane().add(textBox, BorderLayout.SOUTH);
 		frame.getContentPane().add(pane, BorderLayout.CENTER);
 		frame.pack();
@@ -77,7 +80,9 @@ public class Client
 		Socket cs = new Socket(ip, port);
 		recieving = new BufferedReader(new InputStreamReader(cs.getInputStream()));
 		sending = new PrintWriter(cs.getOutputStream(), true);
-	
+		frame.setTitle(frame.getTitle() + " : " + ip + ":" + port);
+		label.setText("Connected on " + ip + ":" + port);
+		messageBox.append("Connected!" + "\n");
 		while(true)
 		{
 			String input = recieving.readLine();
@@ -85,9 +90,16 @@ public class Client
 			if(input == null)
 				break;
 			if(input.startsWith("GETNAME"))
-				sending.println(getName());
+				sending.println(getName().trim());
 			else if(input.startsWith("ADDED"))
+			{
 				textBox.setEditable(true);
+				textBox.requestFocusInWindow();
+			}
+			else if(input.startsWith("LABEL"))
+				label.setText(input.substring(6)); 
+			else if(input.startsWith("CLI "))				//raw msg
+				messageBox.append(input.substring(4) + "\n"); 
 			else if(input.startsWith("MESSAGE"))
 			{
 				for(int i = 0; i < emoKeywords.length; i++)
@@ -98,6 +110,7 @@ public class Client
 					}
 
 				messageBox.append(input.substring(8) + "\n");
+				messageBox.setCaretPosition(messageBox.getDocument().getLength());
 			}
 
 		}

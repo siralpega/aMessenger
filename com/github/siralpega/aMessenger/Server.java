@@ -48,7 +48,7 @@ public class Server
 			try 
 			{
 				Socket connectingClient = server.accept();
-				pool.execute(new ClientThread(connectingClient));
+				pool.execute(new ClientHandler(connectingClient));
 			}
 			catch (IOException ex)
 			{
@@ -87,6 +87,12 @@ public class Server
 		for (PrintWriter pw : clients) 
 			pw.println("MESSAGE " + msg);
 	}
+	
+	public static void sendRawMessage(String msg)
+	{
+		for (PrintWriter pw : clients) 
+			pw.println(msg);
+	}
 
 	public static void addName(String name)
 	{
@@ -94,7 +100,7 @@ public class Server
 		names.add(name);
 		for (PrintWriter pw : clients) 
 			pw.println("MESSAGE " + ">> " + name + " has joined");
-
+		sendRawMessage("LABEL " + getConnected());
 	}
 
 	public static void addWriter(PrintWriter pw)
@@ -112,5 +118,14 @@ public class Server
 			System.out.println(">!< Server is now empty, shutting down.");
 			//TODO: figure this out. cant do in while cause it waits on accept() before this ever gets called
 		}	
+		sendRawMessage("LABEL " + getConnected());
+	}
+	
+	public static String getConnected()
+	{
+		String x = "Connected Users (" + names.size() + "): ";
+		for(int i = 0; i < names.size(); i++)
+			x = x + names.get(i) + "  ";
+		return x;	
 	}
 }
